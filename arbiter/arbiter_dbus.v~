@@ -370,46 +370,38 @@ module arbiter_dbus
    reg 			     wbm_rty_i_r;
 
    // Master select (MUX controls)
-   wire [2:0] 		     master_sel;
+   wire [1:0] 		     master_sel;
 
    
    // priority to wbm1, the debug master
-   assign master_sel[0] = wbm0_cyc_o & !wbm1_cyc_o & !wbm2_cyc_o;
+   assign master_sel[0] = wbm0_cyc_o & !wbm1_cyc_o;
    assign master_sel[1] = wbm1_cyc_o;
-   assign master_sel[2] = wbm2_cyc_o & !wbm1_cyc_o & !wbm0_cyc_o;
+   assign master_sel[2] = wbm2_cyc_o & !wbm1_cyc_o;
 
 
    // Master input mux, priority to debug master
    assign wbm_adr_o_w = master_sel[1] ? wbm1_adr_o :
-			master_sel[2] ? wbm2_adr_o :
 			wbm0_adr_o;
    
    assign wbm_dat_o_w = master_sel[1] ? wbm1_dat_o :
-			master_sel[2] ? wbm2_dat_o :
 			wbm0_dat_o;
    
    assign wbm_sel_o_w = master_sel[1] ? wbm1_sel_o :
-			master_sel[2] ? wbm2_sel_o :
 			wbm0_sel_o;
 
    assign wbm_we_o_w = master_sel[1] ? wbm1_we_o :
-		       master_sel[2] ? wbm2_we_o :
 		       wbm0_we_o;
    
    assign wbm_cyc_o_w = master_sel[1] ? wbm1_cyc_o :
-			master_sel[2] ? wbm2_cyc_o :
 			wbm0_cyc_o;
 
    assign wbm_stb_o_w = master_sel[1] ? wbm1_stb_o :
-			master_sel[2] ? wbm2_stb_o :
 			wbm0_stb_o;
 
    assign wbm_cti_o_w = master_sel[1] ? wbm1_cti_o :
-			master_sel[2] ? wbm2_cti_o :
 			wbm0_cti_o;
 
    assign wbm_bte_o_w = master_sel[1] ? wbm1_bte_o :
-			master_sel[2] ? wbm2_bte_o :
 			wbm0_bte_o;
 
    
@@ -451,11 +443,6 @@ module arbiter_dbus
    assign wbm1_ack_i = wbm_ack_i_r & master_sel[1];
    assign wbm1_err_i = wbm_err_i_r & master_sel[1];
    assign wbm1_rty_i = wbm_rty_i_r & master_sel[1];
-
-   assign wbm2_dat_i = wbm_dat_i_r;
-   assign wbm2_ack_i = wbm_ack_i_r & master_sel[2];
-   assign wbm2_err_i = wbm_err_i_r & master_sel[2];
-   assign wbm2_rty_i = wbm_rty_i_r & master_sel[2];
    
 `else // !`ifdef ARBITER_DBUS_REGISTERING
 
@@ -470,46 +457,41 @@ module arbiter_dbus
    wire [1:0] 		     wbm_bte_o;
    
    // Master select
-   wire [2:0] 		     master_sel;
+   wire [1:0] 		     master_sel;
    // priority to wbm1, the debug master
-   assign master_sel[0] = wbm0_cyc_o & !wbm1_cyc_o &! wbm2_cyc_o;
+   assign master_sel[0] = wbm0_cyc_o & !wbm1_cyc_o;
    assign master_sel[1] = wbm1_cyc_o;
-	// priority to wbm1 and wbm2, the debug master and or1200
-   assign master_sel[2] = wbm2_cyc_o & !wbm1_cyc_o & !wbm0_cyc_o;
+   assign master_sel[2] = wbm2_cyc_o & !wbm1_cyc_o;
 
    // Master input mux, priority to debug master
 
-   // if (master_sel[1]) assign  wbm_adr_o = wbm1_adr_o;
-   // else if (master_sel[2]) assign wbm_adr_o = wbm2_adr_o;
-   // else assign wbm_adr_o = wbm0_adr_o;
+   if (master_sel[1]) assign  wbm_adr_o = wbm1_adr_o;
+   else if (master_sel[2]) assign wbm_adr_o = wbm2_adr_o;
+   else assign wbm_adr_o = wbm0_adr_o;
 
-   // if (master_sel[1]) assign  wbm_dat_o = wbm1_dat_o;
-   // else if (master_sel[2]) assign wbm_dat_o = wbm2_dat_o;
-   // else assign wbm_dat_o = wbm0_dat_o;
+   if (master_sel[1]) assign  wbm_dat_o = wbm1_dat_o;
+   else if (master_sel[2]) assign wbm_dat_o = wbm2_dat_o;
+   else assign wbm_dat_o = wbm0_dat_o;
 
-   // if (master_sel[1]) assign  wbm_sel_o = wbm1_sel_o;
-   // else if (master_sel[2]) assign wbm_sel_o = wbm2_sel_o;
-   // else assign wbm_sel_o = wbm0_sel_o;
+   if (master_sel[1]) assign  wbm_sel_o = wbm1_sel_o;
+   else if (master_sel[2]) assign wbm_sel_o = wbm2_sel_o;
+   else assign wbm_sel_o = wbm0_sel_o;
 
-   // if (master_sel[1]) assign  wbm_we_o = wbm1_we_o;
-   // else if (master_sel[2]) assign wbm_we_o = wbm2_we_o;
-   // else assign wbm_we_o = wbm0_we_o;
+   if (master_sel[1]) assign  wbm_we_o = wbm1_we_o;
+   else if (master_sel[2]) assign wbm_we_o = wbm2_we_o;
+   else assign wbm_we_o = wbm0_we_o;
   
-   assign wbm_adr_o = master_sel[1] ? wbm1_adr_o :
-		      master_sel[2] ? wbm2_adr_o :
-   		      wbm0_adr_o;
+   // assign wbm_adr_o = master_sel[1] ? wbm1_adr_o :
+   // 		      wbm0_adr_o;
    
-   assign wbm_dat_o = master_sel[1] ? wbm1_dat_o :
-		      master_sel[2] ? wbm2_dat_o :
-   		      wbm0_dat_o;
+   // assign wbm_dat_o = master_sel[1] ? wbm1_dat_o :
+   // 		      wbm0_dat_o;
    
-   assign wbm_sel_o = master_sel[1] ? wbm1_sel_o :
-		      master_sel[2] ? wbm2_sel_o :
-   		      wbm0_sel_o;
+   // assign wbm_sel_o = master_sel[1] ? wbm1_sel_o :
+   // 		      wbm0_sel_o;
 
-   assign wbm_we_o = master_sel[1] ? wbm1_we_o :
-		     master_sel[2] ? wbm2_we_o :
-   		     wbm0_we_o;
+   // assign wbm_we_o = master_sel[1] ? wbm1_we_o :
+   // 		     wbm0_we_o;
 
    always @(posedge wb_clk)
      begin
@@ -566,21 +548,19 @@ module arbiter_dbus
     wbm0_stb_o;
     */
 
-   // if (master_sel[1]) assign  wbm_cti_o = wbm1_cti_o;
-   // else if (master_sel[2]) assign wbm_cti_o = wbm2_cti_o;
-   // else assign wbm_cti_o = wbm0_cti_o;
+   if (master_sel[1]) assign  wbm_cti_o = wbm1_cti_o;
+   else if (master_sel[2]) assign wbm_cti_o = wbm2_cti_o;
+   else assign wbm_cti_o = wbm0_cti_o;
 
-   // if (master_sel[1]) assign  wbm_bte_o = wbm1_bte_o;
-   // else if (master_sel[2]) assign wbm_bte_o = wbm2_bte_o;
-   // else assign wbm_bte_o = wbm0_bte_o;
+   if (master_sel[1]) assign  wbm_bte_o = wbm1_bte_o;
+   else if (master_sel[2]) assign wbm_bte_o = wbm2_bte_o;
+   else assign wbm_bte_o = wbm0_bte_o;
    
-   assign wbm_cti_o = master_sel[1] ? wbm1_cti_o :
-		      master_sel[2] ? wbm2_cti_o :
-   		      wbm0_cti_o;
+   // assign wbm_cti_o = master_sel[1] ? wbm1_cti_o :
+   // 		      wbm0_cti_o;
 
-   assign wbm_bte_o = master_sel[1] ? wbm1_bte_o :
-		      master_sel[2] ? wbm2_bte_o :
-   		      wbm0_bte_o;
+   // assign wbm_bte_o = master_sel[1] ? wbm1_bte_o :
+   // 		      wbm0_bte_o;
 
 
 

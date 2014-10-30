@@ -7,7 +7,7 @@
 `define SYN
 
 
-`define SDC_IRQ_ENABLE
+//`define SDC_IRQ_ENABLE
 
 //`define ACTEL
 

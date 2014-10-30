@@ -8,8 +8,16 @@ module sd_clock_divider (
   
   reg [7:0] ClockDiv;
   reg SD_CLK_O;
+`ifdef SYN
+  `ifdef ACTEL
+  CLKINT CLKA
+  (.A (SD_CLK_O),
+   .Y (SD_CLK) 
+   );
+   `endif
+ `endif
  
-`ifdef SIM
+ `ifdef SIM
    assign SD_CLK = SD_CLK_O;
 `endif 
  

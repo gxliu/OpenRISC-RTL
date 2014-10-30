@@ -1,4 +1,3 @@
-`include "timescale.v"
 `include "sd_defines.v"
 
 module sd_data_master (
@@ -46,7 +45,9 @@ module sd_data_master (
 		       output reg [7:0] 	  Dat_Int_Status ,
 		       input 			  Dat_Int_Status_rst,
 		       output reg 		  CIDAT,
-		       input [1:0] 		  transfer_type		       	       
+		       input [1:0] 		  transfer_type
+
+
 		       );
 `define RESEND_MAX_CNT 3
 `ifdef RAM_MEM_WIDTH_32
@@ -125,7 +126,7 @@ module sd_data_master (
 	     end
 	  end
 	  GET_TX_BD: begin
-	     if ( ( bd_cnt> `READ_CYCLE-1) && (tx_full==1) )begin
+	     if ( ( bd_cnt >= (`READ_CYCLE-1)) && (tx_full==1) )begin
 		next_state = SEND_CMD;
 	     end   
 	     else begin
@@ -133,17 +134,16 @@ module sd_data_master (
 	     end
 	  end   
 	  
-	  GET_RX_BD: begin
+	  GET_RX_BD: begin  
 	     if (bd_cnt >= (`READ_CYCLE-1))begin
 		next_state = SEND_CMD;
-		//next_state = GET_RX_BD;
 	     end   
 	     else begin
 		next_state = GET_RX_BD;
 	     end
 	  end
 	  
-	  SEND_CMD: begin
+	  SEND_CMD: begin 
 	     if (send_done)begin
 		next_state = RECIVE_CMD;
 	     end   
@@ -153,10 +153,9 @@ module sd_data_master (
 	  end
 	  
 	  
-	  RECIVE_CMD: begin
+	  RECIVE_CMD: begin 
 	     if (rec_done)
 	       next_state = DATA_TRANSFER;       
-			 //next_state = RECIVE_CMD;       
 	     else if (rec_failed)
 	       next_state =  SEND_CMD;
 	     else 
@@ -164,16 +163,15 @@ module sd_data_master (
 	  end 
 
 	  DATA_TRANSFER: begin
-	     if (trans_done) begin
+	     if (trans_done)
 	       next_state = IDLE;
-		  end
 	     else if (trans_failed)
 	       next_state = STOP;
 	     else
 	       next_state = DATA_TRANSFER;
 	  end
 	  
-	  STOP: begin
+	  STOP: begin 
 	     next_state = STOP_SEND;     
 	  end
 	  
@@ -276,17 +274,19 @@ module sd_data_master (
 	     GET_RX_BD: begin                 
 		//0,1,2,3...
 		re_s_rx <= 1;
+		if ( bd_cnt >= `READ_CYCLE)
+		  re_s_rx <= 0;
+		
 `ifdef  RAM_MEM_WIDTH_32
      		if (ack_i_s_rx) begin        
-	           if( bd_cnt == 2'b0) begin
-	              sys_adr  <= dat_in_rx;
-	              bd_cnt <= bd_cnt+1;   
+	           if( bd_cnt == 0) begin
+	              sys_adr  <= dat_in_rx;  
 	     	   end           
-	           else if ( bd_cnt == 2'b1) begin  
+	           else if ( bd_cnt == 1) begin  
 	              cmd_arg  <= dat_in_rx;
-					  bd_cnt <= bd_cnt+1;   
 	              re_s_rx <= 0; 
 	           end
+		   bd_cnt <= bd_cnt+1; 
 		end
 `endif
 		
@@ -325,44 +325,41 @@ module sd_data_master (
 	     GET_TX_BD:  begin             
 		//0,1,2,3...
 		re_s_tx <= 1;
-		if ( bd_cnt == `READ_CYCLE)
+		if ( bd_cnt >= `READ_CYCLE)
 		  re_s_tx <= 0;
 		
 `ifdef  RAM_MEM_WIDTH_32
-     		if (ack_i_s_tx) begin
-		   
-	           if( bd_cnt == 2'b0) begin
-	              sys_adr  <= dat_in_tx;
-	              bd_cnt <= bd_cnt+1;   
+     		if (ack_i_s_tx) begin		   
+	           if( bd_cnt == 0) begin
+	              sys_adr  <= dat_in_tx;   
 	     	   end           
-	           else if ( bd_cnt == 2'b1) begin  
+	           else if ( bd_cnt == 1) begin  
 	              cmd_arg  <= dat_in_tx;
-						bd_cnt <= bd_cnt+1;   
-	              re_s_tx <= 0; 
-					start_tx_fifo<=1;  
+	              re_s_tx <= 0;
+		      start_tx_fifo<=1;  
 		   end
+		   bd_cnt <= bd_cnt+1;
 		end
 `endif
 		
 `ifdef  RAM_MEM_WIDTH_16
-		if (ack_i_s_tx) begin
-		   
+		if (ack_i_s_tx) begin		   
 		   if( bd_cnt == 0) begin
 		      sys_adr [15:0] <= dat_in_tx; 
-		      bd_cnt <= bd_cnt+1;   end
+		   end
 		   else if ( bd_cnt == 1)  begin
 		      sys_adr [31:16] <= dat_in_tx;
-		      bd_cnt <= bd_cnt+1;    end
+		   end
 		   else if ( bd_cnt == 2) begin
 		      cmd_arg [15:0] <= dat_in_tx;
 		      re_s_tx <= 0;
-		      bd_cnt <= bd_cnt+1;    end
+		   end
 		   else if ( bd_cnt == 3) begin
 		      cmd_arg [31:16] <= dat_in_tx;
 		      re_s_tx <= 0;
-		      bd_cnt <= bd_cnt+1;
 		      start_tx_fifo<=1;  
 		   end
+		   bd_cnt <= bd_cnt+1;
 		end
 `endif
 		//Add Later Save last block addres for comparison with current (For multiple block cmd)

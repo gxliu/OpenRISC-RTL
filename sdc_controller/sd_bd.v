@@ -48,9 +48,9 @@ module sd_bd (
 	end
 	else if (we_m) begin    
 	   if (free_bd >0) begin
-	      write_cnt <=~ write_cnt;
+	      write_cnt <= write_cnt+1;
 	      m_wr_pnt<=m_wr_pnt+1;
-	      new_bw <=0;  
+	      
 	      if (!write_cnt) begin  //First write indicate source buffer addr
 		 bd_mem[m_wr_pnt]<=dat_in_m;       
 		 new_bw <=0;  
@@ -81,6 +81,8 @@ module sd_bd (
 	   if (!last_a_cmp)
 	     free_bd <= free_bd+1;
 	end
+	else
+	  last_a_cmp<=a_cmp;
 	
      end
 
