@@ -48,11 +48,6 @@ module sdc_controller(
   // WISHBONE slave
   wb_adr_i, wb_sel_i, wb_we_i, wb_cyc_i, wb_stb_i, wb_ack_o, 
 
-  // WISHBONE master
-  m_wb_adr_o, m_wb_sel_o, m_wb_we_o, 
-  m_wb_dat_o, m_wb_dat_i, m_wb_cyc_o, 
-  m_wb_stb_o, m_wb_ack_i, 
-  m_wb_cti_o, m_wb_bte_o,
   //SD BUS
   
   sd_cmd_dat_i,sd_cmd_out_o,  sd_cmd_oe_o, card_detect,
@@ -83,18 +78,6 @@ input          wb_stb_i;     // WISHBONE strobe input
 
 output          wb_ack_o;     // WISHBONE acknowledge output
 
-// WISHBONE master
-output  [31:0]  m_wb_adr_o;
-output  [3:0]   m_wb_sel_o;
-output          m_wb_we_o;
-
-input   [31:0]  m_wb_dat_i;
-output  [31:0]  m_wb_dat_o;
-output          m_wb_cyc_o;
-output          m_wb_stb_o;
-input           m_wb_ack_i;
-output  [2:0]   m_wb_cti_o;
-output	[1:0]	m_wb_bte_o;
 //SD port
 
 input  wire [3:0] sd_dat_dat_i;   //Data in from SDcard
